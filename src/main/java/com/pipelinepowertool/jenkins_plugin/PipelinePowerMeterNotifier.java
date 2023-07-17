@@ -9,13 +9,12 @@ import com.pipelinepowertool.common.pipelineplugin.csv.CsvService;
 import com.pipelinepowertool.common.pipelineplugin.csv.CsvServiceImpl;
 import com.pipelinepowertool.common.pipelineplugin.utils.Constants;
 import com.pipelinepowertool.jenkins_plugin.utils.MappingUtils;
+import edu.umd.cs.findbugs.annotations.NonNull;
 import hudson.EnvVars;
 import hudson.Extension;
 import hudson.FilePath;
 import hudson.Launcher;
-import hudson.model.AbstractBuild;
-import hudson.model.AbstractProject;
-import hudson.model.BuildListener;
+import hudson.model.*;
 import hudson.tasks.BuildStepDescriptor;
 import hudson.tasks.Notifier;
 import hudson.tasks.Publisher;
@@ -29,12 +28,13 @@ import java.util.Arrays;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
+import jenkins.tasks.SimpleBuildStep;
 import org.apache.http.HttpHost;
 import org.jenkinsci.Symbol;
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.QueryParameter;
 
-public class PipelinePowerMeterNotifier extends Notifier {
+public class PipelinePowerMeterNotifier extends Notifier implements SimpleBuildStep {
 
     private static final CsvService csvService = new CsvServiceImpl();
     private static final String BUILD_NR = "BUILD_NUMBER";
@@ -80,27 +80,26 @@ public class PipelinePowerMeterNotifier extends Notifier {
     }
 
     @Override
-    public boolean perform(AbstractBuild<?, ?> build, Launcher launcher, BuildListener listener)
+    public void perform(
+            @NonNull Run<?, ?> build,
+            @NonNull FilePath workspace,
+            @NonNull EnvVars env,
+            @NonNull Launcher launcher,
+            @NonNull TaskListener listener)
             throws InterruptedException, IOException {
-
         ElasticSearchService elasticSearchService = createDatabaseConnection(listener);
         PipelinePowerMeterAction action = build.getAction(PipelinePowerMeterAction.class);
 
         FilePath tempDir = new FilePath(launcher.getChannel(), action.getTempDir());
 
         try {
-            FilePath ws = build.getWorkspace();
-            if (ws == null) {
-                return false;
-            }
-
             File csvFile = getCsvFile(tempDir);
             EnergyReadingRecord energyReadingRecord = getEnergyReadingRecord(build, listener, action, csvFile);
             String json = MappingUtils.objectMapper.writeValueAsString(energyReadingRecord);
             FilePath tempJson = tempDir.createTextTempFile(JSON_FILENAME, "tmp", json);
 
             Map<String, String> archiveArtifacts = Map.of(JSON_FILENAME, tempJson.getName());
-            build.getArtifactManager().archive(tempDir, launcher, listener, archiveArtifacts);
+            build.getArtifactManager().archive(tempDir, launcher, (BuildListener) listener, archiveArtifacts);
 
             listener.getLogger().println("Energy reading artifact created");
 
@@ -109,7 +108,7 @@ public class PipelinePowerMeterNotifier extends Notifier {
                     .thenAccept(response -> {
                         String value = response.getValue();
                         if (!value.equalsIgnoreCase(HealthStatus.Green.jsonValue())
-                                || value.equalsIgnoreCase(HealthStatus.Yellow.jsonValue())) {
+                                && !value.equalsIgnoreCase(HealthStatus.Yellow.jsonValue())) {
                             listener.getLogger().println("Database is not healthy");
                             throw new RuntimeException();
                         }
@@ -126,16 +125,14 @@ public class PipelinePowerMeterNotifier extends Notifier {
         } catch (FileNotFoundException e) {
             e.printStackTrace();
             listener.getLogger().println("No energy readings file found");
-            return false;
         } catch (ExecutionException e) {
             listener.getLogger().println("Something went wrong indexing the data");
             throw new RuntimeException(e);
         }
-        return true;
     }
 
     private EnergyReadingRecord getEnergyReadingRecord(
-            AbstractBuild<?, ?> build, BuildListener listener, PipelinePowerMeterAction action, File csvFile)
+            Run<?, ?> build, TaskListener listener, PipelinePowerMeterAction action, File csvFile)
             throws IOException, InterruptedException {
 
         EnergyReading aggregate = csvService.aggregateReadings(csvFile);
@@ -166,7 +163,7 @@ public class PipelinePowerMeterNotifier extends Notifier {
         return ((DescriptorImpl) super.getDescriptor());
     }
 
-    private ElasticSearchService createDatabaseConnection(BuildListener listener) {
+    private ElasticSearchService createDatabaseConnection(TaskListener listener) {
         HttpHost httpHost = new HttpHost(hostName, port, HTTP_SCHEME);
         try (InputStream resource = getClass().getClassLoader().getResourceAsStream(CERT)) {
             if (resource == null) {
