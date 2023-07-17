@@ -1,0 +1,15 @@
+<?jelly escape-by-default='true'?>
+<j:jelly xmlns:j="jelly:core" xmlns:st="jelly:stapler" xmlns:d="jelly:define" xmlns:l="/lib/layout" xmlns:t="/lib/hudson" xmlns:f="/lib/form">
+    <f:entry title="${%Username}" field="userName">
+        <f:textbox default="elastic"/>
+    </f:entry>
+    <f:entry title="${%Password}" field="password">
+        <f:textbox />
+    </f:entry>
+    <f:entry title="${%Host}" field="hostName">
+        <f:textbox default="192.168.1.163"/>
+    </f:entry>
+    <f:entry title="${%Port}" field="port">
+        <f:textbox default="9200"/>
+    </f:entry>
+</j:jelly>

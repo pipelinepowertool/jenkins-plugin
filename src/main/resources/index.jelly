@@ -1,0 +1,4 @@
+<?jelly escape-by-default='true'?>
+<div>
+    Pipeline Plugin for Pipeline Power Tool
+</div>
