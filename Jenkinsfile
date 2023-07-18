@@ -20,7 +20,6 @@ pipeline {
   stages {
     stage('Release plugin artifact on s3') {
       steps {
-        sh 'mvn spotless:apply'
         configFileProvider([configFile(fileId: 'ce7257b3-97e2-4486-86ee-428f65c0ff26', variable: 'MAVEN_SETTINGS')]) {
             sh 'mvn -s $MAVEN_SETTINGS clean install'
         }
