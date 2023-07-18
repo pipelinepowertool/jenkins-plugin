@@ -11,7 +11,7 @@
   <artifactId>jenkins-plugin</artifactId>
   <version>1.0.0</version>
   <packaging>hpi</packaging>
-  <name>TODO Plugin</name>
+  <name>Pipeline Power Tool</name>
   <url>https://github.com/pipelinepowertool/${artifactId}</url>
   <licenses>
     <license>
