@@ -9,7 +9,7 @@
   </parent>
   <groupId>com.pipelinepowertool</groupId>
   <artifactId>jenkins-plugin</artifactId>
-  <version>1.0.0</version>
+  <version>1.0.1</version>
   <packaging>hpi</packaging>
   <name>Pipeline Power Tool</name>
   <url>https://github.com/pipelinepowertool/${artifactId}</url>
