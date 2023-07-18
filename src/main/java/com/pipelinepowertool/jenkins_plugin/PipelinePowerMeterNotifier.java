@@ -92,7 +92,9 @@ public class PipelinePowerMeterNotifier extends Notifier implements SimpleBuildS
             throws InterruptedException, IOException {
         ElasticSearchService elasticSearchService = createDatabaseConnection(listener);
         PipelinePowerMeterAction action = build.getAction(PipelinePowerMeterAction.class);
-
+        if (action == null) {
+            return;
+        }
         FilePath tempDir = new FilePath(launcher.getChannel(), action.getTempDir());
 
         try {
