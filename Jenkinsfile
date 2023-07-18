@@ -10,14 +10,13 @@
 // ])
 
 pipeline {
-  environment {
-    JAVA_TOOL_OPTIONS = '-Duser.home=/root'
-  }
+//   environment {
+//     JAVA_TOOL_OPTIONS = '-Duser.home=/root'
+//   }
   agent {
     docker {
       image 'maven:3.9-eclipse-temurin-17-alpine'
       args '-v /home/jenkins:/root'
-      reuseNode true
     }
   }
   stages {
