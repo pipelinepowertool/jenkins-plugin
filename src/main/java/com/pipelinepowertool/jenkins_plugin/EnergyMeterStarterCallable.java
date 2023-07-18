@@ -2,38 +2,27 @@ package com.pipelinepowertool.jenkins_plugin;
 
 import com.pipelinepowertool.common.pipelineplugin.utils.Constants;
 import hudson.FilePath;
-import java.io.*;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.net.URI;
 import java.nio.channels.Channels;
 import java.nio.channels.FileChannel;
 import java.nio.channels.ReadableByteChannel;
-import java.nio.charset.StandardCharsets;
 import jenkins.security.MasterToSlaveCallable;
 
-public class EnergyMeterStarterCallable extends MasterToSlaveCallable<Long, IOException> {
+public class EnergyMeterStarterCallable extends MasterToSlaveCallable<Void, IOException> {
 
     private final FilePath path;
+    private final String url;
 
-    public EnergyMeterStarterCallable(FilePath path) {
+    public EnergyMeterStarterCallable(FilePath path, String url) {
         this.path = path;
+        this.url = url;
     }
 
     @Override
-    public Long call() throws IOException {
-        ProcessBuilder osReleaseProcessBuilder = new ProcessBuilder();
-        osReleaseProcessBuilder.command("cat", "/etc/os-release");
-        Process osReleaseProcess = osReleaseProcessBuilder.start();
-        String url = Constants.ENERGY_READER_URL_DEFAULT;
-        try (BufferedReader br =
-                new BufferedReader(new InputStreamReader(osReleaseProcess.getInputStream(), StandardCharsets.UTF_8))) {
-            String line;
-            while ((line = br.readLine()) != null) {
-                if (line.toUpperCase().contains("ALPINE")) {
-                    url = Constants.ENERGY_READER_URL_JENKINS_ALPINE;
-                    break;
-                }
-            }
-        }
+    public Void call() throws IOException {
         try (ReadableByteChannel readableByteChannel =
                         Channels.newChannel(URI.create(url).toURL().openStream());
                 FileOutputStream fileOutputStream =
@@ -43,9 +32,6 @@ public class EnergyMeterStarterCallable extends MasterToSlaveCallable<Long, IOEx
         }
         File file = new File(path.getRemote(), Constants.ENERGY_READER_FILENAME);
         file.setExecutable(true);
-        ProcessBuilder energyMeterProcessBuilder = new ProcessBuilder();
-        energyMeterProcessBuilder.command(file.getAbsolutePath(), "&");
-        energyMeterProcessBuilder.directory(file.getParentFile());
-        return energyMeterProcessBuilder.start().pid();
+        return null;
     }
 }

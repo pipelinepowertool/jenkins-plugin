@@ -7,16 +7,10 @@ public class PipelinePowerMeterAction implements Action {
     private final String offsetDateTime;
 
     private final String tempDir;
-    private final Long pid;
 
-    public PipelinePowerMeterAction(String offsetDateTime, String tempDir, Long pid) {
+    public PipelinePowerMeterAction(String offsetDateTime, String tempDir) {
         this.offsetDateTime = offsetDateTime;
         this.tempDir = tempDir;
-        this.pid = pid;
-    }
-
-    public Long getPid() {
-        return pid;
     }
 
     public String getOffsetDateTime() {

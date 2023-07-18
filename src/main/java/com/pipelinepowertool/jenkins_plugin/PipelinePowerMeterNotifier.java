@@ -101,7 +101,6 @@ public class PipelinePowerMeterNotifier extends Notifier implements SimpleBuildS
                 listener.getLogger().println("No channel to agent found");
                 return;
             }
-            channel.call(new EnergyMeterKillerCallable(action.getPid()));
             FilePath csvFile = getCsvFilePath(tempDir);
             JenkinsMetadata jenkinsMetadata = getJenkinsMetadata(build, listener, action);
             EnergyReading energyReading = getEnergyReading(csvFile);

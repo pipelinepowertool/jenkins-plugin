@@ -1,17 +1,16 @@
 package com.pipelinepowertool.jenkins_plugin;
 
 import com.pipelinepowertool.common.pipelineplugin.utils.Constants;
-import hudson.EnvVars;
-import hudson.Extension;
-import hudson.FilePath;
-import hudson.Launcher;
+import hudson.*;
 import hudson.model.AbstractProject;
 import hudson.model.Run;
 import hudson.model.TaskListener;
 import hudson.remoting.VirtualChannel;
 import hudson.tasks.BuildStepDescriptor;
 import hudson.tasks.Builder;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.time.OffsetDateTime;
 import jenkins.tasks.SimpleBuildStep;
 import org.jenkinsci.Symbol;
@@ -42,8 +41,31 @@ public class PipelinePowerMeterBuilder extends Builder implements SimpleBuildSte
 
         OffsetDateTime start = OffsetDateTime.now();
         FilePath tempDir = workspace.createTempDir(Constants.ENERGY_READER_FILENAME, "tmp");
-        Long pid = channel.call(new EnergyMeterStarterCallable(tempDir));
-        run.addAction(new PipelinePowerMeterAction(start.toString(), tempDir.getRemote(), pid));
+        String url = getEnergyReaderUrl(launcher);
+        channel.call(new EnergyMeterStarterCallable(tempDir, url));
+        launcher.launch()
+                .cmdAsSingleString("./" + Constants.ENERGY_READER_FILENAME + " &")
+                .pwd(tempDir)
+                .start();
+        run.addAction(new PipelinePowerMeterAction(start.toString(), tempDir.getRemote()));
+    }
+
+    private String getEnergyReaderUrl(Launcher launcher) throws IOException, InterruptedException {
+        try (ByteArrayOutputStream baos = new ByteArrayOutputStream()) {
+            Proc starter = launcher.launch()
+                    .cmdAsSingleString(OSRELEASE_COMMAND)
+                    .stdout(baos)
+                    .start();
+            int exitCode = starter.join();
+            if (exitCode != 0) {
+                throw new IOException(
+                        "Fail to execute " + OSRELEASE_COMMAND + " because: " + baos.toString(StandardCharsets.UTF_8));
+            }
+            if (baos.toString(StandardCharsets.UTF_8).trim().toUpperCase().contains("ALPINE")) {
+                return Constants.ENERGY_READER_URL_JENKINS_ALPINE;
+            }
+            return Constants.ENERGY_READER_URL_DEFAULT;
+        }
     }
 
     @Symbol("pipelinePowerToolInitiator")
