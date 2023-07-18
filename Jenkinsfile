@@ -17,10 +17,12 @@ pipeline {
     }
   }
   stages {
-    stage('Build against standard GCC') {
+    stage('Release plugin artifact on s3') {
       steps {
         sh 'mvn spotless:apply'
-        sh 'mvn clean install'
+        configFileProvider([configFile(fileId: 'ce7257b3-97e2-4486-86ee-428f65c0ff26', variable: 'MAVEN_SETTINGS')]) {
+            sh 'mvn -s $MAVEN_SETTINGS clean install'
+        }
         withAWS(region:'eu-north-1',credentials:'jenkins-s3') {
           sh 'echo "Uploading content with AWS creds"'
           s3Upload(file:'./target/jenkins-plugin.hpi', bucket:'energy-reader', acl: 'PublicRead')
