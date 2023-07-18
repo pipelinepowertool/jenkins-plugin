@@ -62,9 +62,9 @@ public class PipelinePowerMeterBuilder extends Builder implements SimpleBuildSte
                         "Fail to execute " + OSRELEASE_COMMAND + " because: " + baos.toString(StandardCharsets.UTF_8));
             }
             if (baos.toString(StandardCharsets.UTF_8).trim().toUpperCase().contains("ALPINE")) {
-                return Constants.ENERGY_READER_URL_JENKINS_ALPINE;
+                return Constants.ENERGY_READER_URL_ALPINE;
             }
-            return Constants.ENERGY_READER_URL_DEFAULT;
+            return Constants.ENERGY_READER_URL_STANDARD;
         }
     }
 

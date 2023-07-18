@@ -33,7 +33,7 @@
     <jenkins.version>2.387.3</jenkins.version>
     <gitHubRepo>pipelinepowertool/jenkins-plugin</gitHubRepo>
     <spotless.check.skip>false</spotless.check.skip>
-    <pipeline-plugin.version>1.0.19</pipeline-plugin.version>
+    <pipeline-plugin.version>1.0.21</pipeline-plugin.version>
   </properties>
   <dependencyManagement>
     <dependencies>
