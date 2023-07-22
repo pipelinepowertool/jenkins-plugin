@@ -9,7 +9,7 @@
   </parent>
   <groupId>com.pipelinepowertool</groupId>
   <artifactId>jenkins-plugin</artifactId>
-  <version>1.0.1</version>
+  <version>1.0.2</version>
   <packaging>hpi</packaging>
   <name>Pipeline Power Tool</name>
   <url>https://github.com/pipelinepowertool/${artifactId}</url>
@@ -33,7 +33,7 @@
     <jenkins.version>2.387.3</jenkins.version>
     <gitHubRepo>pipelinepowertool/jenkins-plugin</gitHubRepo>
     <spotless.check.skip>false</spotless.check.skip>
-    <pipeline-plugin.version>1.0.21</pipeline-plugin.version>
+    <pipeline-plugin.version>1.0.22</pipeline-plugin.version>
   </properties>
   <dependencyManagement>
     <dependencies>
