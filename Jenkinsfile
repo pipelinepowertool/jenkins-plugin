@@ -1,19 +1,8 @@
-/*
- See the documentation for more options:
- https://github.com/jenkins-infra/pipeline-library/
-*/
-// buildPlugin(
-//   useContainerAgent: true, // Set to `false` if you need to use Docker for containerized tests
-//   configurations: [
-//     [platform: 'linux', jdk: 17],
-//     [platform: 'windows', jdk: 11],
-// ])
-
 pipeline {
   agent {
     docker {
       image 'maven:3.9-eclipse-temurin-17-alpine'
-      args '-v /home/jenkins:/root'
+        args '-v $HOME/.m2:/root/.m2:z -u root'
     }
   }
   stages {
