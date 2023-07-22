@@ -10,6 +10,7 @@ pipeline {
     stage('Release plugin artifact on s3') {
       steps {
         configFileProvider([configFile(fileId: 'ce7257b3-97e2-4486-86ee-428f65c0ff26', variable: 'MAVEN_SETTINGS')]) {
+            sh 'mvn -s $MAVEN_SETTINGS clean install'
             sh 'mvn -s $MAVEN_SETTINGS hpi:hpi'
         }
         withAWS(region:'eu-north-1',credentials:'jenkins-s3') {
